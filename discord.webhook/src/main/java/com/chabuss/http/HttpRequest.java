@@ -1,4 +1,4 @@
-package chabuss.http;
+package com.chabuss.http;
 
 import java.util.HashMap;
 import java.util.List;

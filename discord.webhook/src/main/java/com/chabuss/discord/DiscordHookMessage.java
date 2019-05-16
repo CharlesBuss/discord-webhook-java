@@ -1,4 +1,4 @@
-package chabuss.discord;
+package com.chabuss.discord;
 
 import java.util.ArrayList;
 import java.util.List;

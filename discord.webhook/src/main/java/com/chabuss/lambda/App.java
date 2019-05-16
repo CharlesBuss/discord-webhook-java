@@ -1,7 +1,8 @@
-package chabuss.lambda.discord;
+package com.chabuss.lambda;
 
-import chabuss.discord.DiscordEmbed;
-import chabuss.discord.DiscordHookMessage;
+import com.chabuss.discord.DiscordEmbed;
+import com.chabuss.discord.DiscordHookMessage;
+
 import io.vertx.core.json.Json;
 
 /**
@@ -27,7 +28,6 @@ public class App
         		.setContent("Here is the content.")
         		.setUserName("BOT NAME")
         		.addEmbed(embed);
-        
         
         System.out.println(message.toJsonObject().encodePrettily());
         
