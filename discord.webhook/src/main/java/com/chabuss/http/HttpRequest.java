@@ -150,7 +150,8 @@ public class HttpRequest {
 				this.response = client.execute(post);
 				this.executed = true;
 				this._getHeaders();
-				this.responseBody = EntityUtils.toString(this.response.getEntity());
+				if(this.response.getEntity() != null)
+					this.responseBody = EntityUtils.toString(this.response.getEntity());
 				return response;
 			case PATCH:
 				this.response = client.execute(patch);
