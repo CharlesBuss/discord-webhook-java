@@ -27,11 +27,7 @@ public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 		
 		DiscordHookMessage message = new DiscordHookMessage();
 		
-		message.setUserName("AWS Lambda");
-		
-		DiscordEmbed embed = new DiscordEmbed()
-				.addField("Region", record.getAwsRegion(), true)
-				.setFooter("AWS Code Commit", null);
+		DiscordEmbed embed = new DiscordEmbed();
 		
 		message.addEmbed(embed);
 		
@@ -45,6 +41,10 @@ public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 				 .addField("Commit", commit.getCommitId(), true)
 				 .addField("Comment", commit.getMessage(), false);
 		}
+		
+
+		embed.addField("Region", record.getAwsRegion(), true)
+			 .setFooter("AWS Code Commit", null);
 		
 		System.out.println(Json.encode(input));
 		System.out.println("WebHook "+record.getCustomData());
