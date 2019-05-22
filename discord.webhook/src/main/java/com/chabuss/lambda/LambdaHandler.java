@@ -1,5 +1,10 @@
 package com.chabuss.lambda;
 
+import com.amazonaws.services.codecommit.AWSCodeCommit;
+import com.amazonaws.services.codecommit.AWSCodeCommitClientBuilder;
+import com.amazonaws.services.codecommit.model.Commit;
+import com.amazonaws.services.codecommit.model.GetCommitRequest;
+import com.amazonaws.services.codecommit.model.GetCommitResult;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.CodeCommitEvent;
@@ -13,6 +18,8 @@ import io.vertx.core.json.Json;
 
 public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 
+	AWSCodeCommit codeCommitClient = AWSCodeCommitClientBuilder.defaultClient();
+	
 	@Override public Void handleRequest(CodeCommitEvent input, Context context) {
 		
 		
@@ -24,15 +31,20 @@ public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 		
 		DiscordEmbed embed = new DiscordEmbed()
 				.addField("Region", record.getAwsRegion(), true)
-				.addField("Event name", record.getEventName(), true)
-				.addField("User", record.getUserIdentityArn().substring(record.getUserIdentityArn().indexOf("/")), true)
 				.setFooter("AWS Code Commit", null);
 		
 		message.addEmbed(embed);
 		
-		for(Reference reference : record.getCodeCommit().getReferences())
-			message.addEmbed(new DiscordEmbed()
-					.addField("Commit", reference.getCommit(), true));
+		// GET REPOSITORY NAME
+		String repositoryName = record.getEventSourceArn().substring(record.getEventSourceArn().lastIndexOf(":")+1);
+		
+		for(Reference reference : record.getCodeCommit().getReferences()) {
+			Commit commit = this.getCommit(reference.getCommit(), repositoryName);
+			System.out.println("Commit: "+Json.encode(commit));
+			embed.addField("User", commit.getCommitter().getName(), true)
+				 .addField("Commit", commit.getCommitId(), true)
+				 .addField("Comment", commit.getMessage(), false);
+		}
 		
 		System.out.println(Json.encode(input));
 		System.out.println("WebHook "+record.getCustomData());
@@ -50,4 +62,12 @@ public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 		return null;
 	}
 
+	private Commit getCommit(String commit, String repositoryName) {
+		GetCommitRequest request = new GetCommitRequest();
+		request.setCommitId(commit);
+		request.setRepositoryName(repositoryName);
+		GetCommitResult result = codeCommitClient.getCommit(request);
+		return result.getCommit();
+	}
+	
 }
