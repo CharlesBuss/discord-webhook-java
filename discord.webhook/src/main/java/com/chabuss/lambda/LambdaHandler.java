@@ -20,14 +20,18 @@ public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 
 	AWSCodeCommit codeCommitClient = AWSCodeCommitClientBuilder.defaultClient();
 	
+	private String colorCommit    = "#24db00";
+	private String colorNewBranch = "#00c4b3";
+	
 	@Override public Void handleRequest(CodeCommitEvent input, Context context) {
 		
-		
+		this.getColors();
 		Record record = input.getRecords().get(0);
 		
 		DiscordHookMessage message = new DiscordHookMessage();
 		
-		DiscordEmbed embed = new DiscordEmbed();
+		DiscordEmbed embed = new DiscordEmbed()
+				.setColorHexdecimal(colorCommit);
 		
 		message.addEmbed(embed);
 		
@@ -70,4 +74,7 @@ public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 		return result.getCommit();
 	}
 	
+	private void getColors() {
+		System.out.println("Getting colors.");
+	}
 }
