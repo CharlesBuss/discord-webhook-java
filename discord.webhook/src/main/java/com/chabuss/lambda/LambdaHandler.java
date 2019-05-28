@@ -21,34 +21,40 @@ public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 	AWSCodeCommit codeCommitClient = AWSCodeCommitClientBuilder.defaultClient();
 	
 	private String colorCommit    = "#24db00";
-	private String colorNewBranch = "#00c4b3";
+	//private String colorNewBranch = "#00c4b3";
 	
 	@Override public Void handleRequest(CodeCommitEvent input, Context context) {
 		
 		this.getColors();
 		Record record = input.getRecords().get(0);
-		
-		DiscordHookMessage message = new DiscordHookMessage();
-		
-		DiscordEmbed embed = new DiscordEmbed()
-				.setColorHexdecimal(colorCommit);
-		
-		message.addEmbed(embed);
-		
+
 		// GET REPOSITORY NAME
 		String repositoryName = record.getEventSourceArn().substring(record.getEventSourceArn().lastIndexOf(":")+1);
 		
+		DiscordHookMessage message = new DiscordHookMessage()
+				.setUserName(repositoryName);
+		
+		DiscordEmbed embed = new DiscordEmbed()
+				.setColorHexdecimal(colorCommit);
+		message.addEmbed(embed);
+		
 		for(Reference reference : record.getCodeCommit().getReferences()) {
+			
+			embed.setDescription("[["+repositoryName+":"+reference.getRef()+"]("+this.buildRepositoryUrl(repositoryName, record.getAwsRegion())+")]");
+			
 			Commit commit = this.getCommit(reference.getCommit(), repositoryName);
 			System.out.println("Commit: "+Json.encode(commit));
-			embed.addField("User", commit.getCommitter().getName(), true)
-				 .addField("Commit", commit.getCommitId(), true)
-				 .addField("Comment", commit.getMessage(), false);
+			
+			String commit_url = this.buildCommitUrl(repositoryName, commit.getCommitId(), record.getAwsRegion());
+			
+			embed.setAuthor(commit.getCommitter().getName(), null, null);
+			embed.addField("Commit from "+commit.getCommitter().getName()+" <"+commit.getCommitter().getEmail()+">",
+					"(["+commit.getCommitId().substring(0, 6)+"]("+commit_url+")) "+commit.getMessage(), 
+					false);
+			break;
 		}
-		
 
-		embed.addField("Region", record.getAwsRegion(), true)
-			 .setFooter("AWS Code Commit", null);
+		embed.setFooter("AWS Code Commit | region "+record.getAwsRegion(), null);
 		
 		System.out.println(Json.encode(input));
 		System.out.println("WebHook "+record.getCustomData());
@@ -76,5 +82,21 @@ public class LambdaHandler implements RequestHandler<CodeCommitEvent, Void> {
 	
 	private void getColors() {
 		System.out.println("Getting colors.");
+	}
+
+	private String buildCommitUrl(String repositoryName, String commitId, String region) {
+		 return "https://"+region+".console.aws.amazon.com/codesuite/codecommit/repositories/"+
+			repositoryName+
+			"/commit/"+
+			commitId+
+			"?region="+
+			region;
+	}
+	
+	private String buildRepositoryUrl(String repositoryName, String region) {
+		return "https://"+region+".console.aws.amazon.com/codesuite/codecommit/repositories/"+
+				repositoryName+
+				"/branches?region="+
+				region;
 	}
 }
