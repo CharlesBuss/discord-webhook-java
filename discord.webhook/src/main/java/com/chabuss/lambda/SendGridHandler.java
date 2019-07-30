@@ -37,7 +37,7 @@ public class SendGridHandler implements RequestHandler<List<SendGridEvent>, Void
 							.addField("Event", e.getEvent(),   true)
 							.addField("Status Code", e.getStatus(), true)
 							.addField("Category", e.getCategory(), true)
-							.addField("Reason", e.getReason(), false);
+							.addField("Response", e.getResponse(), false);
 						break;
 					default:
 						continue;
