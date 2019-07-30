@@ -28,16 +28,17 @@ public class SendGridHandler implements RequestHandler<List<SendGridEvent>, Void
 							 .addField("Email", e.getEmail(),   true)
 							 .addField("Event", e.getEvent(),   true)
 							 .addField("Status Code", e.getStatus(), true)
-							 .addField("Category", e.getCategory(), true)
-							 .addField("Reason", e.getReason(), false);
+							 .addField("Category", e.getCategory(),  true)
+							 .addField("Reason", e.getReason(),      false)
+							 .addField("Response", e.getResponse(),  false);
 						break;
 					case SendGridEvent.DEFERRED:
 						embed.setColorHexdecimal("#ffcc00")
 							.addField("Email", e.getEmail(),   true)
 							.addField("Event", e.getEvent(),   true)
 							.addField("Status Code", e.getStatus(), true)
-							.addField("Category", e.getCategory(), true)
-							.addField("Response", e.getResponse(), false);
+							.addField("Category", e.getCategory(),  true)
+							.addField("Response", e.getResponse(),  false);
 						break;
 					default:
 						continue;
